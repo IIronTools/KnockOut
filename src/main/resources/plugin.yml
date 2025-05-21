@@ -1,0 +1,7 @@
+name: SigmaNokaut
+version: '1.0'
+main: io.github.iirontools.sigmaNokaut.SigmaNokaut
+api-version: '1.21'
+authors: [ Iirontools ]
+description: Plugin na Nokauty z Kwadratowej Masakry
+website: https://github.io/iirontools
