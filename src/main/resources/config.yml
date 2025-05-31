@@ -1,0 +1,10 @@
+# Konfiguracja systemu życia/gracza
+knockout-threshold: 1000        # Poziom przy którym gracz zostaje powalony
+passive-decay-rate: 1           # Tempo pasywnego spadku życia/energii
+heal-per-player-rate: 2         # Tempo leczenia od jednego gracza
+revive-threshold: 1010          # Próg wymagany do wskrzeszenia
+death-threshold: 0              # Próg śmierci gracza
+healing-range: 3.0              # Zasięg leczenia od innych graczy
+
+# Prefiks wiadomości
+message-prefix: "<gray>[<red>System</red>]</gray> " # RichMessage – użyj odpowiedniego formatu jeśli masz niestandardowy parser
