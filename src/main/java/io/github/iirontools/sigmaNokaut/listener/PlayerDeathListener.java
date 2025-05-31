@@ -1,7 +1,6 @@
 package io.github.iirontools.sigmaNokaut.listener;
 
 import io.github.iirontools.sigmaNokaut.SigmaNokaut;
-import io.github.iirontools.sigmaNokaut.model.Nokaut;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;

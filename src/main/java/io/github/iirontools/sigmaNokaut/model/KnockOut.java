@@ -23,7 +23,7 @@ import org.bukkit.scheduler.BukkitRunnable;
 import java.time.Duration;
 import java.util.*;
 
-public class Nokaut extends BukkitRunnable {
+public class KnockOut extends BukkitRunnable {
 
     private final SigmaNokaut plugin;
 
@@ -35,9 +35,10 @@ public class Nokaut extends BukkitRunnable {
 
     private static final BlockData BARRIER_DATA = Material.BARRIER.createBlockData();
     private Location barrierLocation = null;
+    private KnockOutHologram hologram = null;
     private boolean firstIteration = true;
 
-    public Nokaut(SigmaNokaut plugin, Player knockedOutPlayer, Location location) {
+    public KnockOut(SigmaNokaut plugin, Player knockedOutPlayer, Location location) {
         this.plugin = plugin;
         this.knockedOutPlayer = knockedOutPlayer;
         this.liftingPlayer = null;
@@ -57,6 +58,9 @@ public class Nokaut extends BukkitRunnable {
         if (firstIteration) {
             knockedOutPlayer.addPotionEffect(new PotionEffect(PotionEffectType.BLINDNESS, Integer.MAX_VALUE, 10, true));
             firstIteration = false;
+            knockedOutPlayer.setInvulnerable(true);
+            knockedOutPlayer.setCollidable(false);
+            hologram = new KnockOutHologram(location.clone().subtract(0,0.6,0));
         }
 
         if (progress <= config.getDeathThreshold()) {
@@ -73,23 +77,26 @@ public class Nokaut extends BukkitRunnable {
 
         if (liftingPlayer != null) {
             liftingPlayer.addPassenger(knockedOutPlayer);
-            setPose(EntityPose.SWIMMING, true);
+            setPose(EntityPose.SWIMMING, false);
             location = liftingPlayer.getLocation().clone().add(0, 1.75, 0);
-//            knockedOutPlayer.teleport(location);
         } else {
             updateBarrierLocation(location.clone().add(0, 1, 0));
             setPose(EntityPose.SWIMMING, true);
         }
         displayKnockedOutTitle();
         updateHealingProgress(config);
+        hologram.updateHologramLocation(location.clone().subtract(0,0.6,0));
     }
 
     private void finishKnockout(boolean revived) {
         destroyBarrier();
+        hologram.destroyHologram();
         if (liftingPlayer != null) {
             liftingPlayer.removePassenger(knockedOutPlayer);
         }
 
+        knockedOutPlayer.setInvulnerable(false);
+        knockedOutPlayer.setCollidable(true);
         setPose(EntityPose.STANDING, true);
         removeKnockedOutTitle();
         knockedOutPlayer.removePotionEffect(PotionEffectType.BLINDNESS);

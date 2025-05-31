@@ -1,7 +1,7 @@
 package io.github.iirontools.sigmaNokaut.command;
 
 import io.github.iirontools.sigmaNokaut.SigmaNokaut;
-import io.github.iirontools.sigmaNokaut.model.Nokaut;
+import io.github.iirontools.sigmaNokaut.model.KnockOut;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.Location;
@@ -38,24 +38,23 @@ public class PlayerLiftingCommand implements CommandExecutor {
             return true;
         }
 
-        Nokaut nokaut = plugin.getNokautManager().getNokautByUUID(knockedOutUUID);
-        if (nokaut == null) {
+        KnockOut knockOut = plugin.getNokautManager().getNokautByUUID(knockedOutUUID);
+        if (knockOut == null) {
             player.sendMessage(prefix.append(Component.text("W pobliżu nie znajduje się żadnen znokautowany gracz!", NamedTextColor.RED)));
             return true;
         }
 
-        if (nokaut.getKnockedOutPlayer().equals(player)) {
+        if (knockOut.getKnockedOutPlayer().equals(player)) {
             player.sendMessage(prefix.append(Component.text("Jesteś znokautowany. Nie możesz podnosić innych graczy!", NamedTextColor.RED)));
             return true;
         }
 
-        if (nokaut.getLiftingPlayer() != null && nokaut.getLiftingPlayer().equals(player)) {
+        if (knockOut.getLiftingPlayer() != null && knockOut.getLiftingPlayer().equals(player)) {
             player.sendMessage(prefix.append(Component.text("Już podnosisz gracza!", NamedTextColor.RED)));
             return true;
         }
 
-        player.addPassenger(nokaut.getKnockedOutPlayer());
-        nokaut.setLiftingPlayer(player);
+        knockOut.setLiftingPlayer(player);
         player.sendMessage(prefix.append(Component.text("Podniesiono gracza!", NamedTextColor.GREEN)));
         return true;
     }

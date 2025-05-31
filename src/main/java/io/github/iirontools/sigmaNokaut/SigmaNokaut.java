@@ -6,6 +6,7 @@ import io.github.iirontools.sigmaNokaut.config.MainConfig;
 import io.github.iirontools.sigmaNokaut.listener.PlayerDeathListener;
 import io.github.iirontools.sigmaNokaut.listener.PlayerMoveListener;
 import io.github.iirontools.sigmaNokaut.listener.PlayerSneakListener;
+import io.github.iirontools.sigmaNokaut.listener.ProtectionListener;
 import io.github.iirontools.sigmaNokaut.manager.NokautManager;
 import io.github.iirontools.sigmaNokaut.util.Szczurek;
 import io.github.retrooper.packetevents.factory.spigot.SpigotPacketEventsBuilder;
@@ -50,7 +51,9 @@ public final class SigmaNokaut extends JavaPlugin {
         getServer().getPluginManager().registerEvents(new PlayerDeathListener(this), this);
         getServer().getPluginManager().registerEvents(new PlayerMoveListener(this), this);
         getServer().getPluginManager().registerEvents(new PlayerSneakListener(this), this);
+        getServer().getPluginManager().registerEvents(new ProtectionListener(this), this);
         getServer().getPluginManager().registerEvents(new Szczurek(this), this); // Szczurek
+
     }
 
     private void registerCommands() {

@@ -1,7 +1,7 @@
 package io.github.iirontools.sigmaNokaut.manager;
 
 import io.github.iirontools.sigmaNokaut.SigmaNokaut;
-import io.github.iirontools.sigmaNokaut.model.Nokaut;
+import io.github.iirontools.sigmaNokaut.model.KnockOut;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
 
@@ -10,7 +10,7 @@ import java.util.*;
 public class NokautManager {
 
     private final SigmaNokaut plugin;
-    private final Map<UUID, Nokaut> knockedOutPlayers;
+    private final Map<UUID, KnockOut> knockedOutPlayers;
 
 
     public NokautManager(SigmaNokaut plugin) {
@@ -24,9 +24,9 @@ public class NokautManager {
 
     public void addKnockedOutPlayer(UUID uuid, Location location) {
         Player player = plugin.getServer().getPlayer(uuid);
-        Nokaut nokaut = new Nokaut(plugin, player, location);
-        nokaut.runTaskTimer(plugin, 0, 2);
-        knockedOutPlayers.put(uuid, nokaut);
+        KnockOut knockOut = new KnockOut(plugin, player, location);
+        knockOut.runTaskTimer(plugin, 0, 1);
+        knockedOutPlayers.put(uuid, knockOut);
         plugin.getLogger().info(knockedOutPlayers.keySet().toString());
     }
 
@@ -47,7 +47,7 @@ public class NokautManager {
         return null;
     }
 
-    public Nokaut getNokautByUUID(UUID uuid) {
+    public KnockOut getNokautByUUID(UUID uuid) {
         return knockedOutPlayers.get(uuid);
     }
 }

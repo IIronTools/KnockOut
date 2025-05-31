@@ -1,7 +1,7 @@
 package io.github.iirontools.sigmaNokaut.listener;
 
 import io.github.iirontools.sigmaNokaut.SigmaNokaut;
-import io.github.iirontools.sigmaNokaut.model.Nokaut;
+import io.github.iirontools.sigmaNokaut.model.KnockOut;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.entity.Player;
@@ -36,23 +36,23 @@ public class PlayerSneakListener implements Listener {
         Player knockedOutPlayer = plugin.getServer().getPlayer(knockedOutUUID);
         if (knockedOutPlayer == null || !knockedOutPlayer.isOnline()) return;
 
-        Nokaut nokaut = plugin.getNokautManager().getNokautByUUID(knockedOutUUID);
-        if (nokaut == null) return;
+        KnockOut knockOut = plugin.getNokautManager().getNokautByUUID(knockedOutUUID);
+        if (knockOut == null) return;
 
 
         // Przestawanie podnoszenia
-        if (nokaut.getLiftingPlayer() != null && nokaut.getLiftingPlayer().equals(player)) {
-            nokaut.setLiftingPlayer(null);
-            player.removePassenger(nokaut.getKnockedOutPlayer());
-            nokaut.setLocation(event.getPlayer().getLocation());
-            nokaut.getKnockedOutPlayer().teleport(event.getPlayer().getLocation());
+        if (knockOut.getLiftingPlayer() != null && knockOut.getLiftingPlayer().equals(player)) {
+            knockOut.setLiftingPlayer(null);
+            player.removePassenger(knockOut.getKnockedOutPlayer());
+            knockOut.setLocation(event.getPlayer().getLocation());
+            knockOut.getKnockedOutPlayer().teleport(event.getPlayer().getLocation());
             return;
         }
 
         // Leczenie
-        if (nokaut.isHealing(player.getUniqueId())) return;
+        if (knockOut.isHealing(player.getUniqueId())) return;
 
-        nokaut.addHealingPlayer(player.getUniqueId());
+        knockOut.addHealingPlayer(player.getUniqueId());
 
         Component message = Component.text("Leczysz gracza ", NamedTextColor.GREEN).append(knockedOutPlayer.displayName());
         player.sendMessage(plugin.getMainConfig().getMessagePrefix().append(message));
