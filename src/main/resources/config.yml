@@ -1,10 +1,23 @@
-# Konfiguracja systemu życia/gracza
-knockout-threshold: 1000        # Poziom przy którym gracz zostaje powalony
-passive-decay-rate: 1           # Tempo pasywnego spadku życia/energii
-heal-per-player-rate: 2         # Tempo leczenia od jednego gracza
-revive-threshold: 1010          # Próg wymagany do wskrzeszenia
-death-threshold: 0              # Próg śmierci gracza
-healing-range: 3.0              # Zasięg leczenia od innych graczy
+# Player knockout system configuration
+knockout-threshold: 1000        # # Initial value from which knockout begins
+passive-decay-rate: 1           # Rate of passive life decay
+heal-per-player-rate: 2         # Healing rate per nearby player
+revive-threshold: 1010          # Threshold required for revival
+death-threshold: 0              # Player death threshold
+healing-range: 3.0              # Healing range from other players
 
-# Prefiks wiadomości
-message-prefix: "<gray>[<red>System</red>]</gray> " # RichMessage – użyj odpowiedniego formatu jeśli masz niestandardowy parser
+# Message prefix
+
+messages:
+  message-prefix: "<gray>[<red>System</red>]</gray> " # RichMessage
+  console-usage: 'Only players can use this command!' # String
+  not-knocked-out: '<red>You are not knocked out</red>' # RichMessage
+  you-surrendered: '<red>You have surrendered</red>' # RichMessage
+  no-knocked-out-nearby: '<red>There is no knocked out player nearby!</red>' # RichMessage
+  you-are-knocked-out: '<red>You are knocked out and cannot lift other players!</red>' # RichMessage
+  already-lifting: '<red>You are already lifting a player!</red>' # RichMessage
+  player-lifted: '<green>You have lifted the player!</green>' # RichMessage
+  healing-player: '<green>You are healing </green>' #RichMessage
+  chat-prefix-knocked-out: '<red>☠</red><gray>[<dark_red>Knocked Out</dark_red>]<red>☠</red> ' #RichMessage
+  hologram-text: '<red>✚ Knocked Out ✚</red>' #RichMessage
+  healed: "<green>You have been healed</green>"

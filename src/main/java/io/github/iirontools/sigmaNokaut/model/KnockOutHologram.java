@@ -10,13 +10,13 @@ public class KnockOutHologram {
 
     private final ArmorStand hologramStand;
 
-    public KnockOutHologram(Location location) {
+    public KnockOutHologram(Location location, Component hologramText) {
         hologramStand = (ArmorStand) location.getWorld().spawnEntity(location, EntityType.ARMOR_STAND);
         hologramStand.setInvisible(true);
         hologramStand.setInvulnerable(true);
         hologramStand.setGravity(false);
         hologramStand.setCustomNameVisible(true);
-        hologramStand.customName(Component.text("✚ Nokautowany ✚").color(NamedTextColor.RED));
+        hologramStand.customName(hologramText);
         hologramStand.setMarker(true);
     }
 

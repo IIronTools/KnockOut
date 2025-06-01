@@ -5,7 +5,7 @@ import com.github.retrooper.packetevents.protocol.entity.data.EntityData;
 import com.github.retrooper.packetevents.protocol.entity.data.EntityDataTypes;
 import com.github.retrooper.packetevents.protocol.entity.pose.EntityPose;
 import com.github.retrooper.packetevents.wrapper.play.server.WrapperPlayServerEntityMetadata;
-import io.github.iirontools.sigmaNokaut.SigmaNokaut;
+import io.github.iirontools.sigmaNokaut.SigmaKnockOut;
 import io.github.iirontools.sigmaNokaut.config.MainConfig;
 import lombok.Getter;
 import lombok.Setter;
@@ -25,7 +25,7 @@ import java.util.*;
 
 public class KnockOut extends BukkitRunnable {
 
-    private final SigmaNokaut plugin;
+    private final SigmaKnockOut plugin;
 
     @Getter private final Player knockedOutPlayer;
     @Getter @Setter private Player liftingPlayer;
@@ -38,7 +38,7 @@ public class KnockOut extends BukkitRunnable {
     private KnockOutHologram hologram = null;
     private boolean firstIteration = true;
 
-    public KnockOut(SigmaNokaut plugin, Player knockedOutPlayer, Location location) {
+    public KnockOut(SigmaKnockOut plugin, Player knockedOutPlayer, Location location) {
         this.plugin = plugin;
         this.knockedOutPlayer = knockedOutPlayer;
         this.liftingPlayer = null;
@@ -49,7 +49,7 @@ public class KnockOut extends BukkitRunnable {
     @Override
     public void run() {
         if (knockedOutPlayer == null || !knockedOutPlayer.isOnline()) {
-            this.cancel();
+            finishKnockout(false);
             return;
         }
 
@@ -60,12 +60,11 @@ public class KnockOut extends BukkitRunnable {
             firstIteration = false;
             knockedOutPlayer.setInvulnerable(true);
             knockedOutPlayer.setCollidable(false);
-            hologram = new KnockOutHologram(location.clone().subtract(0,0.6,0));
+            hologram = new KnockOutHologram(location.clone().subtract(0,0.6,0), config.getHologramText());
         }
 
         if (progress <= config.getDeathThreshold()) {
             finishKnockout(false);
-            this.cancel();
             return;
         }
 
@@ -88,7 +87,7 @@ public class KnockOut extends BukkitRunnable {
         hologram.updateHologramLocation(location.clone().subtract(0,0.6,0));
     }
 
-    private void finishKnockout(boolean revived) {
+    public void finishKnockout(boolean revived) {
         destroyBarrier();
         hologram.destroyHologram();
         if (liftingPlayer != null) {
@@ -103,12 +102,12 @@ public class KnockOut extends BukkitRunnable {
 
         if (revived) {
             knockedOutPlayer.sendMessage(plugin.getMainConfig().getMessagePrefix()
-                    .append(Component.text("Zostałeś uleczony", NamedTextColor.GREEN)));
+                    .append(plugin.getMainConfig().getHealedMessage()));
         } else {
             knockedOutPlayer.setHealth(0.0);
         }
 
-        plugin.getNokautManager().removeKnockedOutPlayer(knockedOutPlayer.getUniqueId());
+        plugin.getKnockOutManager().removeKnockedOutPlayer(knockedOutPlayer.getUniqueId());
         this.cancel();
     }
 

@@ -1,9 +1,9 @@
 package io.github.iirontools.sigmaNokaut.command;
 
-import io.github.iirontools.sigmaNokaut.SigmaNokaut;
+import io.github.iirontools.sigmaNokaut.SigmaKnockOut;
+import io.github.iirontools.sigmaNokaut.config.MainConfig;
 import io.github.iirontools.sigmaNokaut.model.KnockOut;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.Location;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
@@ -15,47 +15,49 @@ import java.util.UUID;
 
 public class PlayerLiftingCommand implements CommandExecutor {
 
-    private final SigmaNokaut plugin;
+    private final SigmaKnockOut plugin;
+    private final MainConfig mainConfig;
 
-    public PlayerLiftingCommand(SigmaNokaut plugin) {
+    public PlayerLiftingCommand(SigmaKnockOut plugin) {
         this.plugin = plugin;
+        this.mainConfig = plugin.getMainConfig();
     }
 
     @Override
     public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, @NotNull String @NotNull [] args) {
 
         if (!(sender instanceof Player player)) {
-            sender.sendMessage("Tylko gracze mogą używać tej komendy");
+            sender.sendMessage(mainConfig.getConsoleUsageMessage());
             return true;
         }
 
         Location location = player.getLocation();
         Component prefix = plugin.getMainConfig().getMessagePrefix();
 
-        UUID knockedOutUUID = plugin.getNokautManager().getKnockedOutPlayerWithinDistance(location, plugin.getMainConfig().getHealingRange()); // TODO trzeba dodać nowy RANGE do configu
+        UUID knockedOutUUID = plugin.getKnockOutManager().getKnockedOutPlayerWithinDistance(location, plugin.getMainConfig().getHealingRange()); // TODO trzeba dodać nowy RANGE do configu
         if (knockedOutUUID == null) {
-            player.sendMessage(prefix.append(Component.text("W pobliżu nie znajduje się żadnen znokautowany gracz!", NamedTextColor.RED)));
+            player.sendMessage(prefix.append(mainConfig.getNoKnockedOutNearbyMessage()));
             return true;
         }
 
-        KnockOut knockOut = plugin.getNokautManager().getNokautByUUID(knockedOutUUID);
+        KnockOut knockOut = plugin.getKnockOutManager().getNokautByUUID(knockedOutUUID);
         if (knockOut == null) {
-            player.sendMessage(prefix.append(Component.text("W pobliżu nie znajduje się żadnen znokautowany gracz!", NamedTextColor.RED)));
+            player.sendMessage(prefix.append(mainConfig.getNoKnockedOutNearbyMessage()));
             return true;
         }
 
         if (knockOut.getKnockedOutPlayer().equals(player)) {
-            player.sendMessage(prefix.append(Component.text("Jesteś znokautowany. Nie możesz podnosić innych graczy!", NamedTextColor.RED)));
+            player.sendMessage(prefix.append(mainConfig.getYouAreKnockedOutMessage()));
             return true;
         }
 
         if (knockOut.getLiftingPlayer() != null && knockOut.getLiftingPlayer().equals(player)) {
-            player.sendMessage(prefix.append(Component.text("Już podnosisz gracza!", NamedTextColor.RED)));
+            player.sendMessage(prefix.append(mainConfig.getAlreadyLiftingMessage()));
             return true;
         }
 
         knockOut.setLiftingPlayer(player);
-        player.sendMessage(prefix.append(Component.text("Podniesiono gracza!", NamedTextColor.GREEN)));
+        player.sendMessage(prefix.append(mainConfig.getPlayerLiftedMessage()));
         return true;
     }
 }

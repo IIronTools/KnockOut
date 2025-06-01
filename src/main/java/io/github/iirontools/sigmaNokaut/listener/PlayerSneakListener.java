@@ -1,9 +1,8 @@
 package io.github.iirontools.sigmaNokaut.listener;
 
-import io.github.iirontools.sigmaNokaut.SigmaNokaut;
+import io.github.iirontools.sigmaNokaut.SigmaKnockOut;
+import io.github.iirontools.sigmaNokaut.config.MainConfig;
 import io.github.iirontools.sigmaNokaut.model.KnockOut;
-import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -13,10 +12,12 @@ import java.util.UUID;
 
 public class PlayerSneakListener implements Listener {
 
-    private final SigmaNokaut plugin;
+    private final SigmaKnockOut plugin;
+    private final MainConfig mainConfig;
 
-    public PlayerSneakListener(SigmaNokaut plugin) {
+    public PlayerSneakListener(SigmaKnockOut plugin) {
         this.plugin = plugin;
+        this.mainConfig = plugin.getMainConfig();
     }
 
     @EventHandler
@@ -27,7 +28,7 @@ public class PlayerSneakListener implements Listener {
         }
 
         Player player = event.getPlayer();
-        UUID knockedOutUUID = plugin.getNokautManager().getKnockedOutPlayerWithinDistance(player.getLocation(), plugin.getMainConfig().getHealingRange());
+        UUID knockedOutUUID = plugin.getKnockOutManager().getKnockedOutPlayerWithinDistance(player.getLocation(), plugin.getMainConfig().getHealingRange());
 
         if (knockedOutUUID == null || knockedOutUUID.equals(player.getUniqueId())) {
             event.setCancelled(true);
@@ -36,11 +37,10 @@ public class PlayerSneakListener implements Listener {
         Player knockedOutPlayer = plugin.getServer().getPlayer(knockedOutUUID);
         if (knockedOutPlayer == null || !knockedOutPlayer.isOnline()) return;
 
-        KnockOut knockOut = plugin.getNokautManager().getNokautByUUID(knockedOutUUID);
+        KnockOut knockOut = plugin.getKnockOutManager().getNokautByUUID(knockedOutUUID);
         if (knockOut == null) return;
-
-
-        // Przestawanie podnoszenia
+        
+        // Stopping Lifting
         if (knockOut.getLiftingPlayer() != null && knockOut.getLiftingPlayer().equals(player)) {
             knockOut.setLiftingPlayer(null);
             player.removePassenger(knockOut.getKnockedOutPlayer());
@@ -49,12 +49,10 @@ public class PlayerSneakListener implements Listener {
             return;
         }
 
-        // Leczenie
+        // Healing
         if (knockOut.isHealing(player.getUniqueId())) return;
 
         knockOut.addHealingPlayer(player.getUniqueId());
-
-        Component message = Component.text("Leczysz gracza ", NamedTextColor.GREEN).append(knockedOutPlayer.displayName());
-        player.sendMessage(plugin.getMainConfig().getMessagePrefix().append(message));
+        player.sendMessage(mainConfig.getMessagePrefix().append(mainConfig.getHealingPlayerMessage()).append(knockedOutPlayer.displayName()));
     }
 }

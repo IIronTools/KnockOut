@@ -1,22 +1,20 @@
 package io.github.iirontools.sigmaNokaut;
 
 import com.github.retrooper.packetevents.PacketEvents;
+import io.github.iirontools.sigmaNokaut.command.GiveUpCommand;
 import io.github.iirontools.sigmaNokaut.command.PlayerLiftingCommand;
 import io.github.iirontools.sigmaNokaut.config.MainConfig;
-import io.github.iirontools.sigmaNokaut.listener.PlayerDeathListener;
-import io.github.iirontools.sigmaNokaut.listener.PlayerMoveListener;
-import io.github.iirontools.sigmaNokaut.listener.PlayerSneakListener;
-import io.github.iirontools.sigmaNokaut.listener.ProtectionListener;
-import io.github.iirontools.sigmaNokaut.manager.NokautManager;
+import io.github.iirontools.sigmaNokaut.listener.*;
+import io.github.iirontools.sigmaNokaut.manager.KnockOutManager;
 import io.github.iirontools.sigmaNokaut.util.Szczurek;
 import io.github.retrooper.packetevents.factory.spigot.SpigotPacketEventsBuilder;
+import lombok.Getter;
 import org.bukkit.plugin.java.JavaPlugin;
 
-public final class SigmaNokaut extends JavaPlugin {
+public final class SigmaKnockOut extends JavaPlugin {
 
-    private MainConfig mainConfig;
-
-    private NokautManager nokautManager;
+    @Getter private MainConfig mainConfig;
+    @Getter private KnockOutManager knockOutManager;
 
     @Override
     public void onLoad() {
@@ -44,28 +42,21 @@ public final class SigmaNokaut extends JavaPlugin {
     }
 
     private void registerManagers() {
-        this.nokautManager = new NokautManager(this);
+        this.knockOutManager = new KnockOutManager(this);
     }
 
     private void registerListeners() {
         getServer().getPluginManager().registerEvents(new PlayerDeathListener(this), this);
         getServer().getPluginManager().registerEvents(new PlayerMoveListener(this), this);
         getServer().getPluginManager().registerEvents(new PlayerSneakListener(this), this);
-        getServer().getPluginManager().registerEvents(new ProtectionListener(this), this);
+        getServer().getPluginManager().registerEvents(new PlayerQuitListener(this), this);
+        getServer().getPluginManager().registerEvents(new ProtectionListener(mainConfig, knockOutManager), this);
         getServer().getPluginManager().registerEvents(new Szczurek(this), this); // Szczurek
 
     }
 
     private void registerCommands() {
         getCommand("podniesgracza").setExecutor(new PlayerLiftingCommand(this));
-    }
-
-
-    public MainConfig getMainConfig() {
-        return mainConfig;
-    }
-
-    public NokautManager getNokautManager() {
-        return nokautManager;
+        getCommand("poddajsie").setExecutor(new GiveUpCommand(this));
     }
 }

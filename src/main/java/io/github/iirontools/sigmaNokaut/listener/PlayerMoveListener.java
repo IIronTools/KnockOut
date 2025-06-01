@@ -1,6 +1,6 @@
 package io.github.iirontools.sigmaNokaut.listener;
 
-import io.github.iirontools.sigmaNokaut.SigmaNokaut;
+import io.github.iirontools.sigmaNokaut.SigmaKnockOut;
 import io.github.iirontools.sigmaNokaut.model.KnockOut;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -8,19 +8,18 @@ import org.bukkit.event.player.PlayerMoveEvent;
 
 public class PlayerMoveListener implements Listener {
 
-    private final SigmaNokaut plugin;
+    private final SigmaKnockOut plugin;
 
-    public PlayerMoveListener(SigmaNokaut plugin) {
+    public PlayerMoveListener(SigmaKnockOut plugin) {
         this.plugin = plugin;
     }
 
     @EventHandler
     public void onPlayerMove(PlayerMoveEvent event) {
-        if (!plugin.getNokautManager().isKnockedOut(event.getPlayer().getUniqueId())) return;
-        KnockOut knockOut = plugin.getNokautManager().getNokautByUUID(event.getPlayer().getUniqueId());
+        if (!plugin.getKnockOutManager().isKnockedOut(event.getPlayer().getUniqueId())) return;
+        KnockOut knockOut = plugin.getKnockOutManager().getNokautByUUID(event.getPlayer().getUniqueId());
         if (knockOut != null) {
             if (knockOut.getLiftingPlayer() != null) {
-                System.out.println("nokaut.getLiftingPlayer() != null");
                 return;
             }
         }

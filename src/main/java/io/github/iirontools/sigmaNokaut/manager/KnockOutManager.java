@@ -1,19 +1,19 @@
 package io.github.iirontools.sigmaNokaut.manager;
 
-import io.github.iirontools.sigmaNokaut.SigmaNokaut;
+import io.github.iirontools.sigmaNokaut.SigmaKnockOut;
 import io.github.iirontools.sigmaNokaut.model.KnockOut;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
 
 import java.util.*;
 
-public class NokautManager {
+public class KnockOutManager {
 
-    private final SigmaNokaut plugin;
+    private final SigmaKnockOut plugin;
     private final Map<UUID, KnockOut> knockedOutPlayers;
 
 
-    public NokautManager(SigmaNokaut plugin) {
+    public KnockOutManager(SigmaKnockOut plugin) {
         this.plugin = plugin;
         this.knockedOutPlayers = new HashMap<>();
     }

@@ -1,6 +1,6 @@
 name: SigmaNokaut
 version: '1.0'
-main: io.github.iirontools.sigmaNokaut.SigmaNokaut
+main: io.github.iirontools.sigmaNokaut.SigmaKnockOut
 api-version: '1.21'
 authors: [ Iirontools ]
 description: Plugin na Nokauty z Kwadratowej Masakry
@@ -9,3 +9,8 @@ commands:
   podniesgracza:
     description: Podnosi gracza
     usage: /podniesgracza
+  poddajsie:
+    description: Poddaje sie
+    usage: /poddajsie
+    aliases:
+      - giveup

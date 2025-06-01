@@ -1,6 +1,6 @@
 package io.github.iirontools.sigmaNokaut.util;
 
-import io.github.iirontools.sigmaNokaut.SigmaNokaut;
+import io.github.iirontools.sigmaNokaut.SigmaKnockOut;
 import io.papermc.paper.event.player.AsyncChatEvent;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
@@ -12,9 +12,9 @@ import org.bukkit.event.Listener;
 
 public class Szczurek implements Listener {
 
-    private final SigmaNokaut plugin;
+    private final SigmaKnockOut plugin;
 
-    public Szczurek(SigmaNokaut plugin) {
+    public Szczurek(SigmaKnockOut plugin) {
         this.plugin = plugin;
     }
 

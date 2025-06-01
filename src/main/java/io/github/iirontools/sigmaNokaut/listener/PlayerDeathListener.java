@@ -1,6 +1,6 @@
 package io.github.iirontools.sigmaNokaut.listener;
 
-import io.github.iirontools.sigmaNokaut.SigmaNokaut;
+import io.github.iirontools.sigmaNokaut.SigmaKnockOut;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -11,9 +11,9 @@ import java.util.UUID;
 
 public class PlayerDeathListener implements Listener {
 
-    private final SigmaNokaut plugin;
+    private final SigmaKnockOut plugin;
 
-    public PlayerDeathListener(SigmaNokaut plugin) {
+    public PlayerDeathListener(SigmaKnockOut plugin) {
         this.plugin = plugin;
     }
 
@@ -23,15 +23,13 @@ public class PlayerDeathListener implements Listener {
         Player player = event.getPlayer();
         UUID uuid = player.getUniqueId();
 
-        if (plugin.getNokautManager().isKnockedOut(uuid)) {
-            System.out.println("isalready");
+        if (plugin.getKnockOutManager().isKnockedOut(uuid)) {
             return;
         }
 
         Location location = player.getLocation();
 
         event.setCancelled(true);
-        System.out.println("canceled");
-        plugin.getNokautManager().addKnockedOutPlayer(uuid, location);
+        plugin.getKnockOutManager().addKnockedOutPlayer(uuid, location);
     }
 }
