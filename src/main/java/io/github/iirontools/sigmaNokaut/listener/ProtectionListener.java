@@ -78,11 +78,6 @@ public class ProtectionListener implements Listener {
         }
     }
 
-//    @EventHandler
-//    public void onCommand(PlayerCommandPreprocessEvent event) {
-//        if (nokautManager.isKnockedOut(event.getPlayer().getUniqueId())) event.setCancelled(true);
-//    }
-
     @EventHandler
     public void onEntityInteract(EntityInteractEvent event) {
         if (event.getEntity() instanceof Player player && knockOutManager.isKnockedOut(player.getUniqueId())) {

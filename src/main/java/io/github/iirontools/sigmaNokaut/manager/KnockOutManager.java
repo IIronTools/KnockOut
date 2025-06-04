@@ -27,7 +27,6 @@ public class KnockOutManager {
         KnockOut knockOut = new KnockOut(plugin, player, location);
         knockOut.runTaskTimer(plugin, 0, 1);
         knockedOutPlayers.put(uuid, knockOut);
-        plugin.getLogger().info(knockedOutPlayers.keySet().toString());
     }
 
     public void removeKnockedOutPlayer(UUID uuid) {
@@ -37,10 +36,8 @@ public class KnockOutManager {
     public UUID getKnockedOutPlayerWithinDistance(Location location, double distance) {
         for (var entry : knockedOutPlayers.entrySet()) {
             Location knockedOutLocation = entry.getValue().getLocation();
-            System.out.println(knockedOutLocation);
 
             if (location.distanceSquared(knockedOutLocation) <= Math.pow(distance, 2)) {
-                System.out.println(entry.getKey());
                 return entry.getKey();
             }
         }

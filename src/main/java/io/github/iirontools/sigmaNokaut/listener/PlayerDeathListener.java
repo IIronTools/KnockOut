@@ -19,7 +19,6 @@ public class PlayerDeathListener implements Listener {
 
     @EventHandler
     public void onPlayerDeath(PlayerDeathEvent event) {
-
         Player player = event.getPlayer();
         UUID uuid = player.getUniqueId();
 

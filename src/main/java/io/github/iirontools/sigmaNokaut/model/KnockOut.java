@@ -11,11 +11,9 @@ import lombok.Getter;
 import lombok.Setter;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
-import net.kyori.adventure.text.format.TextDecoration;
 import net.kyori.adventure.title.Title;
 import org.bukkit.Location;
 import org.bukkit.Material;
-import org.bukkit.Particle;
 import org.bukkit.block.data.BlockData;
 import org.bukkit.entity.Player;
 import org.bukkit.potion.PotionEffect;
@@ -28,6 +26,7 @@ import java.util.*;
 public class KnockOut extends BukkitRunnable {
 
     private final SigmaKnockOut plugin;
+    private final MainConfig config;
 
     @Getter private final Player knockedOutPlayer;
     @Getter @Setter private Player liftingPlayer;
@@ -37,15 +36,26 @@ public class KnockOut extends BukkitRunnable {
 
     private static final BlockData BARRIER_DATA = Material.BARRIER.createBlockData();
     private Location barrierLocation = null;
-    private KnockOutHologram hologram = null;
-    private boolean firstIteration = true;
+    private final KnockOutHologram hologram;
+
+    private EntityPose currentPose = null;
+    private int lastDisplayedHearts = -1;
+    private Location lastHoloLocation;
+    private int lastHoloHearts = -1;
 
     public KnockOut(SigmaKnockOut plugin, Player knockedOutPlayer, Location location) {
         this.plugin = plugin;
+        this.config = plugin.getMainConfig();
         this.knockedOutPlayer = knockedOutPlayer;
         this.liftingPlayer = null;
         this.location = location;
         this.progress = plugin.getMainConfig().getKnockoutThreshold(); // Seconds
+
+        // Moved from fistIteration
+        knockedOutPlayer.addPotionEffect(new PotionEffect(PotionEffectType.BLINDNESS, Integer.MAX_VALUE, 10, true));
+        knockedOutPlayer.setInvulnerable(true);
+        knockedOutPlayer.setCollidable(false);
+        hologram = new KnockOutHologram(location, List.of(config.getHologramText(), Component.text(Math.round(progress)).append(Component.text(" ♥", NamedTextColor.RED))));
     }
 
     @Override
@@ -55,16 +65,6 @@ public class KnockOut extends BukkitRunnable {
             return;
         }
 
-        MainConfig config = plugin.getMainConfig();
-
-        if (firstIteration) {
-            knockedOutPlayer.addPotionEffect(new PotionEffect(PotionEffectType.BLINDNESS, Integer.MAX_VALUE, 10, true));
-            firstIteration = false;
-            knockedOutPlayer.setInvulnerable(true);
-            knockedOutPlayer.setCollidable(false);
-            hologram = new KnockOutHologram(location, List.of(config.getHologramText(), Component.text(Math.round(progress)).append(Component.text(" ♥", NamedTextColor.RED))));
-        }
-
         if (progress <= 0) {
             finishKnockout(false);
             return;
@@ -72,20 +72,38 @@ public class KnockOut extends BukkitRunnable {
 
         if (progress >= config.getReviveThreshold()) {
             finishKnockout(true);
-            this.cancel();
             return;
         }
 
         if (liftingPlayer != null) {
+            destroyBarrier();
             liftingPlayer.addPassenger(knockedOutPlayer);
-            setPose(EntityPose.SWIMMING, false);
+            updatePose(EntityPose.SWIMMING, false);
             location = liftingPlayer.getLocation().clone().add(0, 1.75, 0);
         } else {
             updateBarrierLocation(location.clone().add(0, 1, 0));
-            setPose(EntityPose.SWIMMING, true);
+            updatePose(EntityPose.SWIMMING, true);
         }
 
-        displayKnockedOutTitle();
+        int currentHearts = (int) Math.round(progress);
+        Location currentLoc = liftingPlayer != null ? liftingPlayer.getLocation().clone().add(0, 1.75, 0) : location.clone().add(0, 1, 0);
+
+        if (!currentLoc.equals(lastHoloLocation) || currentHearts != lastHoloHearts) {
+            hologram.updateHologramLocation(
+                    currentLoc,
+                    List.of(
+                            config.getHologramText(),
+                            Component.text(currentHearts).append(Component.text(" ♥", NamedTextColor.RED))
+                    )
+            );
+            lastHoloLocation = currentLoc.clone();
+            lastHoloHearts = currentHearts;
+        }
+        if (currentHearts != lastDisplayedHearts) {
+            updateKnockedOutTitle(currentHearts);
+            lastDisplayedHearts = currentHearts;
+        }
+
         updateHealingProgress(config);
         hologram.updateHologramLocation(location, List.of(config.getHologramText(),Component.text(Math.round(progress)).append(Component.text(" ♥", NamedTextColor.RED))));
     }
@@ -99,43 +117,55 @@ public class KnockOut extends BukkitRunnable {
 
         knockedOutPlayer.setInvulnerable(false);
         knockedOutPlayer.setCollidable(true);
-        setPose(EntityPose.STANDING, true);
+        updatePose(EntityPose.STANDING, true);
         removeKnockedOutTitle();
         knockedOutPlayer.removePotionEffect(PotionEffectType.BLINDNESS);
 
         if (revived) {
-            knockedOutPlayer.sendMessage(plugin.getMainConfig().getMessagePrefix()
-                    .append(plugin.getMainConfig().getHealedMessage()));
+            knockedOutPlayer.sendMessage(config.getMessagePrefix()
+                    .append(config.getHealedMessage()));
         } else {
             knockedOutPlayer.setHealth(0.0);
         }
-
         plugin.getKnockOutManager().removeKnockedOutPlayer(knockedOutPlayer.getUniqueId());
         this.cancel();
     }
 
+    private void updateKnockedOutTitle(int hearts) {
+        Component subtitle = config.getKnockedOutSubtitle()
+                .replaceText(builder -> builder
+                        .matchLiteral("{seconds}")
+                        .replacement(Component.text(hearts, NamedTextColor.YELLOW))
+                );
+
+        Title title = Title.title(
+                config.getKnockedOutTitle(),
+                subtitle,
+                Title.Times.times(Duration.ZERO, Duration.ofDays(10000), Duration.ZERO)
+        );
+        knockedOutPlayer.showTitle(title);
+    }
+
     private void updateHealingProgress(MainConfig config) {
         boolean anyHealerInRange = false;
+
         Iterator<UUID> iterator = healingPlayers.iterator();
         while (iterator.hasNext()) {
             UUID uuid = iterator.next();
             Player healer = plugin.getServer().getPlayer(uuid);
-            if (healer != null && healer.isOnline() &&
-                    healer.getLocation().distanceSquared(this.location) <= Math.pow(config.getHealingRange(), 2)) {
+            if (healer == null || !healer.isOnline()) {
+                iterator.remove();
+                continue;
+            }
+            if (healer.getLocation().distanceSquared(this.location) <= Math.pow(config.getHealingRange(), 2)) {
                 anyHealerInRange = true;
                 progress += (double) config.getHealPerPlayerRate() / 20;
-            } else {
-                iterator.remove();
             }
         }
-
         if (!anyHealerInRange) {
             if (liftingPlayer == null) {
                 progress -= 0.05;
             }
-        } else {
-//            knockedOutPlayer.getWorld().spawnParticle(Particle.HEART, knockedOutPlayer.getLocation(), 1);
-
         }
     }
 
@@ -146,41 +176,29 @@ public class KnockOut extends BukkitRunnable {
     }
 
     private void destroyBarrier() {
-        if (barrierLocation != null) {
+        if (barrierLocation != null && barrierLocation.getWorld() != null) {
             knockedOutPlayer.sendBlockChange(barrierLocation, barrierLocation.getBlock().getBlockData());
             barrierLocation = null;
         }
     }
 
-    private void setPose(EntityPose entityPose, boolean ignoreKnockedOutPlayer) {
-        int entityId = knockedOutPlayer.getEntityId();
-        List<EntityData<?>> metadataList = new ArrayList<>();
-        metadataList.add(new EntityData<>(6, EntityDataTypes.ENTITY_POSE, entityPose));
-        WrapperPlayServerEntityMetadata packet = new WrapperPlayServerEntityMetadata(entityId, metadataList);
-
-        for (var onlinePlayer : plugin.getServer().getOnlinePlayers()) {
-            if (ignoreKnockedOutPlayer && onlinePlayer.equals(knockedOutPlayer)) continue;
-            PacketEvents.getAPI().getPlayerManager().sendPacket(onlinePlayer, packet);
-        }
-    }
-
-    private void displayKnockedOutTitle() {
-        int secondsRemaining = (int) Math.round(progress);
-        Component subtitle = plugin.getMainConfig().getKnockedOutSubtitle().replaceText(builder -> builder
-                .matchLiteral("{seconds}")
-                .replacement(Component.text(String.valueOf(secondsRemaining), NamedTextColor.YELLOW))
-        );
-
-        Title title = Title.title(
-                plugin.getMainConfig().getKnockedOutTitle(),
-                subtitle,
-                Title.Times.times(Duration.ZERO, Duration.ofDays(10000), Duration.ZERO)
-        );
-        knockedOutPlayer.showTitle(title);
-    }
-
     private void removeKnockedOutTitle() {
         knockedOutPlayer.clearTitle();
+    }
+
+    private void updatePose(EntityPose newPose, boolean ignoreKnockedOutPlayer) {
+        currentPose = newPose;
+        List<EntityData<?>> metadataList = List.of(
+                new EntityData<>(6, EntityDataTypes.ENTITY_POSE, newPose)
+        );
+        WrapperPlayServerEntityMetadata packet = new WrapperPlayServerEntityMetadata(
+                knockedOutPlayer.getEntityId(), metadataList
+        );
+
+        for (Player online : plugin.getServer().getOnlinePlayers()) {
+            if (ignoreKnockedOutPlayer && online.equals(knockedOutPlayer)) continue;
+            PacketEvents.getAPI().getPlayerManager().sendPacket(online, packet);
+        }
     }
 
     public boolean isHealing(UUID uuid) {
