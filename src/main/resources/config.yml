@@ -1,23 +1,23 @@
 # Player knockout system configuration
-knockout-threshold: 1000        # # Initial value from which knockout begins
-passive-decay-rate: 1           # Rate of passive life decay
-heal-per-player-rate: 2         # Healing rate per nearby player
-revive-threshold: 1010          # Threshold required for revival
-death-threshold: 0              # Player death threshold
+knockout-threshold: 60          # Initial value from which knockout begins
+heal-per-player-rate: 2         # Amount of extra seconds given
+revive-threshold: 80            # Seconds required for revival
 healing-range: 3.0              # Healing range from other players
-
-# Message prefix
+lifting-range: 2.0              # Maximum distance (in blocks) from which a player can start lifting a knocked-out player
 
 messages:
-  message-prefix: "<gray>[<red>System</red>]</gray> " # RichMessage
-  console-usage: 'Only players can use this command!' # String
-  not-knocked-out: '<red>You are not knocked out</red>' # RichMessage
-  you-surrendered: '<red>You have surrendered</red>' # RichMessage
-  no-knocked-out-nearby: '<red>There is no knocked out player nearby!</red>' # RichMessage
-  you-are-knocked-out: '<red>You are knocked out and cannot lift other players!</red>' # RichMessage
-  already-lifting: '<red>You are already lifting a player!</red>' # RichMessage
-  player-lifted: '<green>You have lifted the player!</green>' # RichMessage
-  healing-player: '<green>You are healing </green>' #RichMessage
-  chat-prefix-knocked-out: '<red>☠</red><gray>[<dark_red>Knocked Out</dark_red>]<red>☠</red> ' #RichMessage
-  hologram-text: '<red>✚ Knocked Out ✚</red>' #RichMessage
+  message-prefix: "<gray>[<red>System</red>]</gray> "
+  console-usage: "Only players can use this command!" # String
+  not-knocked-out: "<red>You are not knocked out</red>"
+  you-surrendered: "<red>You have surrendered</red>"
+  no-knocked-out-nearby: "<red>There is no knocked out player nearby!</red>"
+  you-are-knocked-out: "<red>You are knocked out and cannot lift other players!</red>"
+  already-lifting: "<red>You are already lifting a player!</red>"
+  player-lifted: "<green>You have lifted the player!</green>"
+  healing-player: "<green>You are healing </green>"
+  chat-prefix-knocked-out: "<red>☠</red><gray>[<dark_red>Knocked Out</dark_red>]<red>☠</red> "
+  hologram-text: "<red>✚ Knocked Out ✚</red>"
   healed: "<green>You have been healed</green>"
+  knocked-out-title: "<dark_red>You are knocked out</dark_red>"
+  knocked-out-subtitle: "<gold>You have </gold>{seconds} seconds><gold> left</gold>"
+

@@ -34,7 +34,7 @@ public class PlayerLiftingCommand implements CommandExecutor {
         Location location = player.getLocation();
         Component prefix = plugin.getMainConfig().getMessagePrefix();
 
-        UUID knockedOutUUID = plugin.getKnockOutManager().getKnockedOutPlayerWithinDistance(location, plugin.getMainConfig().getHealingRange()); // TODO trzeba dodać nowy RANGE do configu
+        UUID knockedOutUUID = plugin.getKnockOutManager().getKnockedOutPlayerWithinDistance(location, plugin.getMainConfig().getLiftingRange());
         if (knockedOutUUID == null) {
             player.sendMessage(prefix.append(mainConfig.getNoKnockedOutNearbyMessage()));
             return true;

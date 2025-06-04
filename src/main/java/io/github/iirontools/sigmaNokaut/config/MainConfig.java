@@ -17,11 +17,10 @@ public class MainConfig {
 
 
     @Getter private int knockoutThreshold;
-    @Getter private int passiveDecayRate;
     @Getter private int healPerPlayerRate;
     @Getter private int reviveThreshold;
-    @Getter private int deathThreshold;
     @Getter private double healingRange;
+    @Getter private double liftingRange;
 
     @Getter private Component messagePrefix;
     @Getter private String consoleUsageMessage;
@@ -35,6 +34,8 @@ public class MainConfig {
     @Getter private Component chatPrefixKnockedOutMessage;
     @Getter private Component hologramText;
     @Getter private Component healedMessage;
+    @Getter private Component knockedOutTitle;
+    @Getter private Component knockedOutSubtitle;
 
     public MainConfig(SigmaKnockOut plugin) {
         this.plugin = plugin;
@@ -50,11 +51,10 @@ public class MainConfig {
         config = YamlConfiguration.loadConfiguration(file);
 
         knockoutThreshold = config.getInt("knockout-threshold", 1000);
-        passiveDecayRate = config.getInt("passive-decay-rate", 1);
         healPerPlayerRate = config.getInt("heal-per-player-rate", 2);
         reviveThreshold = config.getInt("revive-threshold", 1010);
-        deathThreshold = config.getInt("death-threshold", 0);
         healingRange = config.getDouble("healing-range", 3.0);
+        liftingRange = config.getDouble("lifting-range", 2.0);
 
         ConfigurationSection messages = config.getConfigurationSection("messages");
         if (messages != null) {
@@ -76,7 +76,8 @@ public class MainConfig {
                     .append(Component.text("☠", NamedTextColor.RED)));
             hologramText = messages.getRichMessage( "holograms.knocked-out-name", Component.text("✚ Knocked Out ✚", NamedTextColor.RED));
             healedMessage = messages.getRichMessage("healed", Component.text("You have been healed", NamedTextColor.GREEN));
-
+            knockedOutTitle = messages.getRichMessage("knocked-out-title", Component.text("You are knocked out", NamedTextColor.DARK_RED));
+            knockedOutSubtitle = messages.getRichMessage("knocked-out-subtitle", Component.text("<gold>You have </gold><yellow>{seconds} seconds</yellow><gold> left</gold>"));
         }
     }
 }

@@ -11,9 +11,11 @@ import lombok.Getter;
 import lombok.Setter;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
+import net.kyori.adventure.text.format.TextDecoration;
 import net.kyori.adventure.title.Title;
 import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.Particle;
 import org.bukkit.block.data.BlockData;
 import org.bukkit.entity.Player;
 import org.bukkit.potion.PotionEffect;
@@ -31,7 +33,7 @@ public class KnockOut extends BukkitRunnable {
     @Getter @Setter private Player liftingPlayer;
     @Getter @Setter private Location location;
     private final Set<UUID> healingPlayers = new HashSet<>();
-    private int progress;
+    private double progress;
 
     private static final BlockData BARRIER_DATA = Material.BARRIER.createBlockData();
     private Location barrierLocation = null;
@@ -43,7 +45,7 @@ public class KnockOut extends BukkitRunnable {
         this.knockedOutPlayer = knockedOutPlayer;
         this.liftingPlayer = null;
         this.location = location;
-        this.progress = plugin.getMainConfig().getKnockoutThreshold();
+        this.progress = plugin.getMainConfig().getKnockoutThreshold(); // Seconds
     }
 
     @Override
@@ -60,10 +62,10 @@ public class KnockOut extends BukkitRunnable {
             firstIteration = false;
             knockedOutPlayer.setInvulnerable(true);
             knockedOutPlayer.setCollidable(false);
-            hologram = new KnockOutHologram(location.clone().subtract(0,0.6,0), config.getHologramText());
+            hologram = new KnockOutHologram(location, List.of(config.getHologramText(), Component.text(Math.round(progress)).append(Component.text(" ♥", NamedTextColor.RED))));
         }
 
-        if (progress <= config.getDeathThreshold()) {
+        if (progress <= 0) {
             finishKnockout(false);
             return;
         }
@@ -82,9 +84,10 @@ public class KnockOut extends BukkitRunnable {
             updateBarrierLocation(location.clone().add(0, 1, 0));
             setPose(EntityPose.SWIMMING, true);
         }
+
         displayKnockedOutTitle();
         updateHealingProgress(config);
-        hologram.updateHologramLocation(location.clone().subtract(0,0.6,0));
+        hologram.updateHologramLocation(location, List.of(config.getHologramText(),Component.text(Math.round(progress)).append(Component.text(" ♥", NamedTextColor.RED))));
     }
 
     public void finishKnockout(boolean revived) {
@@ -120,14 +123,19 @@ public class KnockOut extends BukkitRunnable {
             if (healer != null && healer.isOnline() &&
                     healer.getLocation().distanceSquared(this.location) <= Math.pow(config.getHealingRange(), 2)) {
                 anyHealerInRange = true;
-                progress += config.getHealPerPlayerRate();
+                progress += (double) config.getHealPerPlayerRate() / 20;
             } else {
                 iterator.remove();
             }
         }
 
         if (!anyHealerInRange) {
-            progress -= config.getPassiveDecayRate();
+            if (liftingPlayer == null) {
+                progress -= 0.05;
+            }
+        } else {
+//            knockedOutPlayer.getWorld().spawnParticle(Particle.HEART, knockedOutPlayer.getLocation(), 1);
+
         }
     }
 
@@ -157,12 +165,14 @@ public class KnockOut extends BukkitRunnable {
     }
 
     private void displayKnockedOutTitle() {
-        int secondsRemaining = (progress - plugin.getMainConfig().getDeathThreshold()) / 20;
-        Component subtitle = Component.text("Zostało ci ", NamedTextColor.GOLD)
-                .append(Component.text(secondsRemaining + " sekund", NamedTextColor.YELLOW));
+        int secondsRemaining = (int) Math.round(progress);
+        Component subtitle = plugin.getMainConfig().getKnockedOutSubtitle().replaceText(builder -> builder
+                .matchLiteral("{seconds}")
+                .replacement(Component.text(String.valueOf(secondsRemaining), NamedTextColor.YELLOW))
+        );
 
         Title title = Title.title(
-                Component.text("Jesteś znokautowany", NamedTextColor.DARK_RED),
+                plugin.getMainConfig().getKnockedOutTitle(),
                 subtitle,
                 Title.Times.times(Duration.ZERO, Duration.ofDays(10000), Duration.ZERO)
         );
