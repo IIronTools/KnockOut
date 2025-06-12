@@ -7,6 +7,8 @@ description: Plugin na Nokauty z Kwadratowej Masakry
 website: https://github.io/iirontools
 depend:
   - packetevents
+softdepend:
+  - CombatLogX
 commands:
   podniesgracza:
     description: Podnosi gracza

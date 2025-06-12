@@ -16,6 +16,12 @@ public class PlayerQuitListener implements Listener {
 
     @EventHandler
     public void onQuit(PlayerQuitEvent event) {
+        if (plugin.getCombatLogX().getCombatManager().isInCombat(event.getPlayer())) {
+            plugin.getLogger().severe("Was in combat");
+        } else {
+            plugin.getLogger().severe("Was NOT in combat");
+        }
+
         if (!plugin.getKnockOutManager().isKnockedOut(event.getPlayer().getUniqueId())) return;
 
         KnockOut knockOut = plugin.getKnockOutManager().getNokautByUUID(event.getPlayer().getUniqueId());

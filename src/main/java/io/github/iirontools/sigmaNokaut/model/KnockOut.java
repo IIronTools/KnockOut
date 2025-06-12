@@ -5,6 +5,10 @@ import com.github.retrooper.packetevents.protocol.entity.data.EntityData;
 import com.github.retrooper.packetevents.protocol.entity.data.EntityDataTypes;
 import com.github.retrooper.packetevents.protocol.entity.pose.EntityPose;
 import com.github.retrooper.packetevents.wrapper.play.server.WrapperPlayServerEntityMetadata;
+import com.github.sirblobman.combatlogx.api.object.TagReason;
+import com.github.sirblobman.combatlogx.api.object.TagType;
+import com.github.sirblobman.combatlogx.api.object.TimerUpdater;
+import com.github.sirblobman.combatlogx.api.object.UntagReason;
 import io.github.iirontools.sigmaNokaut.SigmaKnockOut;
 import io.github.iirontools.sigmaNokaut.config.MainConfig;
 import lombok.Getter;
@@ -38,7 +42,6 @@ public class KnockOut extends BukkitRunnable {
     private Location barrierLocation = null;
     private final KnockOutHologram hologram;
 
-    private EntityPose currentPose = null;
     private int lastDisplayedHearts = -1;
     private Location lastHoloLocation;
     private int lastHoloHearts = -1;
@@ -106,6 +109,8 @@ public class KnockOut extends BukkitRunnable {
 
         updateHealingProgress(config);
         hologram.updateHologramLocation(location, List.of(config.getHologramText(),Component.text(Math.round(progress)).append(Component.text(" ♥", NamedTextColor.RED))));
+
+        plugin.getCombatLogX().getCombatManager().tag(knockedOutPlayer, knockedOutPlayer, TagType.UNKNOWN, TagReason.UNKNOWN);
     }
 
     public void finishKnockout(boolean revived) {
@@ -187,7 +192,6 @@ public class KnockOut extends BukkitRunnable {
     }
 
     private void updatePose(EntityPose newPose, boolean ignoreKnockedOutPlayer) {
-        currentPose = newPose;
         List<EntityData<?>> metadataList = List.of(
                 new EntityData<>(6, EntityDataTypes.ENTITY_POSE, newPose)
         );
